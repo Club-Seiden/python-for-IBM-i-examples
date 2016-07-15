@@ -1,3 +1,4 @@
+#!/QOpenSys/usr/bin/python3
 import argparse
 import ibm_db   # To install on the IBM i execute
                 # easy_install3 /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-2.0.5.2-py3.4-os400-powerpc.egg
