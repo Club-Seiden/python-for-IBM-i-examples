@@ -1,9 +1,8 @@
 #!/QOpenSys/usr/bin/python3
 import argparse
 import ibm_db   # To install on the IBM i execute
-                # easy_install3 /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-2.0.5.2-py3.4-os400-powerpc.egg
-                # Make sure you install 5733OPS-SI58194 and that you have
-                # ibm_db-2.0.5.2 not ibm_db-2.0.5.1
+                # pip3 install /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-*-cp34m-*.whl
+                # Make sure you have installed 5733OPS PTF SI59051 and SI60563 or subsequent PTF's!
 
 import platform
 import sys
