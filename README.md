@@ -1,2 +1,2 @@
-# python-IBM-i-examples
+# python-for-IBM-i-examples
 Python utilities and scripts for IBM i
