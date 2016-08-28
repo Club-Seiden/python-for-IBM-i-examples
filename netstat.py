@@ -3,6 +3,7 @@ import argparse
 import ibm_db   # To install on the IBM i execute
                 # pip3 install /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-*-cp34m-*.whl
                 # Make sure you have installed 5733OPS PTF SI59051 and SI60563 or subsequent PTF's!
+                # See https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
 
 import platform
 import sys
