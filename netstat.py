@@ -21,7 +21,11 @@ if __name__ == "__main__":
         help='Look for only local port')
     args = parser.parse_args()
 
-    cn = ibm_db.connect('dbname', 'myuser', 'mypass', {})
+try:
+  conn = ibm_db.connect('dbname', 'myuser', 'mypass', {})
+except:
+  print("no connection:", ibm_db.conn_errormsg())
+if conn:
     sql = '''
 SELECT
         REMOTE_ADDRESS, REMOTE_PORT, REMOTE_PORT_NAME,
@@ -39,7 +43,7 @@ SELECT
     if args.offset is not None:
         sql += "\n    OFFSET {0}".format(args.offset)
 
-    netstat_stmt = ibm_db.prepare(cn, sql)
+    netstat_stmt = ibm_db.prepare(conn, sql)
     ibm_db.execute(netstat_stmt, params)
     row = ibm_db.fetch_assoc(netstat_stmt)
     if row:
@@ -48,4 +52,6 @@ SELECT
             rows.append(row)
             row = ibm_db.fetch_assoc(netstat_stmt)
         print(tabulate(rows, 'keys'))
-    ibm_db.close(cn)
+    ibm_db.close(conn)
+else:
+  print ('connection failed')
