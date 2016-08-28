@@ -21,9 +21,12 @@ if __name__ == "__main__":
         help='Look for only local port')
     args = parser.parse_args()
 
+# With the recently updated Python db2 adapter: https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
+# a value of "None" is permitted for user and password. 
+# Supplying "None" creates a connection based on the user profile of the user running the script.
 db_name = '*LOCAL'
-username = 'username'
-password = 'password'
+username = None
+password = None
 
 try:
   conn = ibm_db.connect(db_name, username, password, {})
