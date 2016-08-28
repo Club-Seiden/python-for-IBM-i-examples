@@ -21,8 +21,12 @@ if __name__ == "__main__":
         help='Look for only local port')
     args = parser.parse_args()
 
+db_name = '*LOCAL'
+username = 'username'
+password = 'password'
+
 try:
-  conn = ibm_db.connect('dbname', 'myuser', 'mypass', {})
+  conn = ibm_db.connect(db_name, username, password, {})
 except:
   print("no connection:", ibm_db.conn_errormsg())
 if conn:
