@@ -1,9 +1,16 @@
 #!/QOpenSys/usr/bin/python3
 import argparse
-import ibm_db_dbi as dbi  # To install on the IBM i execute
-                # pip3 install /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-*-cp34m-*.whl
-                # Make sure you have installed 5733OPS PTF SI59051, SI60563, SI63852 or subsequent PTF's!
-                # See https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
+
+# To install necessary prerequisites:
+# - Make sure you have installed 5733OPS PTF SI59051, SI60563, SI63852 or subsequent PTF's!
+#   See https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
+# - pip3 install /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-*-cp34m-*.whl
+# - pip3 install tabulate --user
+
+
+# Using the ibm_db_dbi package instead of the ibm_db package gives you a database driver compliant with 
+# Python specifications, which can be found at https://www.python.org/dev/peps/pep-0249/
+import ibm_db_dbi as dbi  
 
 import platform
 import sys
@@ -45,6 +52,8 @@ SELECT
         sql += "\n    OFFSET {0}".format(args.offset)
     
     cur.execute(sql, params)
+    # One advantage to using a spec-compliant driver is that it works well with many Python modules, like tabulate(),
+    # which understands what to do with a standard cursor object. https://pypi.python.org/pypi/tabulate
     print(tabulate(cur, 'keys'))
     cur.close()
 
