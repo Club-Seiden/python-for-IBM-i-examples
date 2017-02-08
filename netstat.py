@@ -1,13 +1,13 @@
 #!/QOpenSys/usr/bin/python3
 import argparse
-import ibm_db   # To install on the IBM i execute
+import ibm_db_dbi as dbi  # To install on the IBM i execute
                 # pip3 install /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-*-cp34m-*.whl
-                # Make sure you have installed 5733OPS PTF SI59051 and SI60563 or subsequent PTF's!
+                # Make sure you have installed 5733OPS PTF SI59051, SI60563, SI63852 or subsequent PTF's!
                 # See https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
 
 import platform
 import sys
-from tabulate import tabulate # pip install tabulate --user
+from tabulate import tabulate # pip3 install tabulate --user
 
 
 if __name__ == "__main__":
@@ -21,24 +21,19 @@ if __name__ == "__main__":
         help='Look for only local port')
     args = parser.parse_args()
 
-# With the recently updated Python db2 adapter: https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
-# a value of "None" is permitted for user and password. 
-# Supplying "None" creates a connection based on the user profile of the user running the script.
-db_name = '*LOCAL'
-username = None
-password = None
-
 try:
-  conn = ibm_db.connect(db_name, username, password, {})
-except:
-  print("no connection:", ibm_db.conn_errormsg())
-if conn:
+    # The connect() with no parameters will connect to database *LOCAL. 
+    # requires ibm_db 2.0.5.5, which you get via SI61963 and the following command to install:
+    #    pip3 install /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-*-cp34m-*.whl
+    conn = dbi.connect()
+    
+    cur = conn.cursor()
     sql = '''
 SELECT
-        REMOTE_ADDRESS, REMOTE_PORT, REMOTE_PORT_NAME,
-        LOCAL_ADDRESS, LOCAL_PORT, LOCAL_PORT_NAME,
-        CONNECTION_TYPE,
-        TRIM(AUTHORIZATION_NAME) AS AUTHORIZATION_NAME, JOB_NAME, SLIC_TASK_NAME
+        REMOTE_ADDRESS as RemoteAddr, REMOTE_PORT as RmtPort, REMOTE_PORT_NAME as RmtPortName,
+        LOCAL_ADDRESS, LOCAL_PORT as Port, LOCAL_PORT_NAME as PortName,
+        CONNECTION_TYPE as TYPE,
+        TRIM(AUTHORIZATION_NAME) AS AUTH_NAME, JOB_NAME, SLIC_TASK_NAME
     FROM QSYS2.NETSTAT_JOB_INFO
     {0} -- WHERE CLAUSE
     ORDER BY LOCAL_PORT, LOCAL_ADDRESS, REMOTE_PORT,  REMOTE_ADDRESS
@@ -49,16 +44,10 @@ SELECT
         sql += "\n    LIMIT {0}".format(args.limit)
     if args.offset is not None:
         sql += "\n    OFFSET {0}".format(args.offset)
+    
+    cur.execute(sql, params)
+    print(tabulate(cur, 'keys'))
+    cur.close()
 
-    netstat_stmt = ibm_db.prepare(conn, sql)
-    ibm_db.execute(netstat_stmt, params)
-    row = ibm_db.fetch_assoc(netstat_stmt)
-    if row:
-        rows = [row]
-        while row != False:
-            rows.append(row)
-            row = ibm_db.fetch_assoc(netstat_stmt)
-        print(tabulate(rows, 'keys'))
-    ibm_db.close(conn)
-else:
-  print ('connection failed')
+except:
+    print("Unexpected error:", sys.exc_info())
