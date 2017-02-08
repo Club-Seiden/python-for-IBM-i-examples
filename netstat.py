@@ -23,8 +23,7 @@ if __name__ == "__main__":
 
 try:
     # The connect() with no parameters will connect to database *LOCAL. 
-    # requires ibm_db 2.0.5.5, which you get via SI61963 and the following command to install:
-    #    pip3 install /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-*-cp34m-*.whl
+    # This flavor requires ibm_db 2.0.5.5, which you get via SI63852 and the 'pip3' command referenced earlier. 
     conn = dbi.connect()
     
     cur = conn.cursor()
