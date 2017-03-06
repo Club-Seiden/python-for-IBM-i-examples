@@ -1,4 +1,4 @@
-# -ibmi_netstat_py  
+# netstat  
 Python script for IBM i that provides NETSTAT information  
 using DB2 QSYS2.NETSTAT_JOB_INFO service.  
 
