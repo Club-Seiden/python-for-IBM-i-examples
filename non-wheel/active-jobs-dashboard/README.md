@@ -7,6 +7,15 @@ using the DB2 qsys2.active_job_info service.
    See https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
  - ```pip3 install /QOpenSys/QIBM/ProdData/OPS/Python-pkgs/ibm_db/ibm_db-*-cp34m-*.whl```
  - ```pip3 install bottle```
+ - From jquery
+    - jquery-3.1.0-min.js or latest version (rename to jquery-latest.js, copy to your code directory)
+ - from tablesorter download (__jquery.tablesorter.zip), copy these files to your code directory. Do not retain the "themes/blue" directory structure:
+    - jquery.tablesorter.min.js
+    - themes/blue/asc.gif
+    - themes/blue/bg.gif
+    - themes/blue/desc.gif
+    - themes/blue/style.css
+
 
 # Starting the server 
 python3 ./server.py
