@@ -1,6 +1,6 @@
 # Active Jobs Dashboard
 Python script for IBM i that shows active jobs and allows sorting
-using the DB2 qsys2.active_job_info service.  
+using the DB2 qsys2.active_job_info() service.  
 
 # Installing requisites
  - Make sure you have installed 5733OPS Option 2, along with PTF's SI59051, SI60563, and SI61963 (or subsequent PTF's)!
