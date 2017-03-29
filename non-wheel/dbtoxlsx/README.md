@@ -10,6 +10,8 @@ spreadsheet.
 
 Requires the latest ibm_db PTF: 
 https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
+And xlsxwriter via command from SSH or qp2term:
+pip3 install xlsxwriter
 
 optional arguments:
   -h, --help            show this help message and exit
