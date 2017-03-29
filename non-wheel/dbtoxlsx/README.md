@@ -3,8 +3,13 @@ Sample usage:
 ```
 usage: dbtoxlsx.py [-h] [-c C] [-l L] [-f [FNAMES [FNAMES ...]]] [-o O] [-b B] [-i I]
 
+Example: python3 dbtoxlsx.py -c "select * From QSYS2.USER_INFO WHERE STATUS = '*ENABLED'" -o /home/test.xlsx 
+
 Implement SQL from IBM i command line and direct output to an Excel
 spreadsheet.
+
+Requires the latest ibm_db PTF: 
+https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
 
 optional arguments:
   -h, --help            show this help message and exit
