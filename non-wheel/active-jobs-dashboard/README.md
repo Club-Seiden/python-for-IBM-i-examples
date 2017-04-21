@@ -12,4 +12,4 @@ python3 ./server.py
 
 Point your web browser to http://&lt;systemname&gt;:3333
 
-![screen shot](./active-jobs-dashboard/screenshot.jpg?raw=true)
+![screen shot](./screenshot.jpg?raw=true)
