@@ -15,5 +15,5 @@ $ python3 httpsrv.py -c --conf=zendsvr6 --name=develop # Create an HTTP Server I
 $ python3 httpsrv.py -c --conf=zendphp7 --name=develop # Create an HTTP Server Instance. Configuration: PHP 7, Name: DEVELOP
 $ python3 httpsrv.py -c --conf=apache --name=develop   # Create an HTTP Server Instance. Configuration: Apache, Name: DEVELOP
 $ python3 httpsrv.py -d --name=develop                 # Delete HTTP Server Instance with name DEVELOP
-$ python3 httpsrv.py -r --name=develop --new-name=test # Rname HTTP Server Instance DEVELOP to TEST
+$ python3 httpsrv.py -r --name=develop --newname=test # Rname HTTP Server Instance DEVELOP to TEST
 ```
