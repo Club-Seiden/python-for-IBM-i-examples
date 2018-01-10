@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import optparse
+import argparse
 import os
 # import config
 # from itoolkit import *
@@ -413,25 +413,25 @@ def main():
     python3 httpsrv.py -r --name=test --newname=develop
     python3 httpsrv.py -d --name=develop
 '''
-    p = optparse.OptionParser(usage)
-    p.add_option('-c', action='store_true', dest="create", help='Create HTTP Server Instance')
-    p.add_option('-d', action='store_true', dest="delete", help='Delete HTTP Server Instance')
-    p.add_option('-r', action='store_true', dest="rename", help='Rename HTTP Server Instance')
-    p.add_option('--conf', '-t', default="zendphp7",
+    p = argparse.ArgumentParser(usage)
+    p.add_argument('-c', action='store_true', dest="create", help='Create HTTP Server Instance')
+    p.add_argument('-d', action='store_true', dest="delete", help='Delete HTTP Server Instance')
+    p.add_argument('-r', action='store_true', dest="rename", help='Rename HTTP Server Instance')
+    p.add_argument('--conf', '-t', default="zendphp7",
          help='Template to use for Apache Config. zendphp7|zendsvr6|apache [default: zendphp7]')
-    p.add_option('--name', '-n', help="Name of HTTP Server Instance")
-    p.add_option('--newname', '-e', help="New name for HTTP Server Instance")
-    p.add_option('--port', '-p', help="Default port for HTTP Server Instance")
-    options, arguments = p.parse_args()
+    p.add_argument('--name', '-n', help="Name of HTTP Server Instance")
+    p.add_argument('--newname', '-e', help="New name for HTTP Server Instance")
+    p.add_argument('--port', '-p', help="Default port for HTTP Server Instance")
+    args = p.parse_args()
 
-    if len([x for x in (options.create, options.delete, options.rename) if x is not None]) != 1:
-        p.error('options -c, -d, and -r cannot be used together.')
+    if len([x for x in (args.create, args.delete, args.rename) if x is not False]) != 1:
+        p.error('args -c, -d, and -r cannot be used together.')
 
-    if options.create:
-        if len([x for x in (options.name, options.conf, options.port) if x is not None]) == 3:
-            if options.conf in ['apache', 'zendphp7', 'zendsvr6']:
-                if len(options.name) <= 10:
-                    create(options.name, options.conf, options.port)
+    if args.create:
+        if len([x for x in (args.name, args.conf, args.port) if x is not False]) == 3:
+            if args.conf in ['apache', 'zendphp7', 'zendsvr6']:
+                if len(args.name) <= 10:
+                    create(args.name, args.conf, args.port)
                 else:
                     p.error('Name must be 10 characters or less')
             else:
