@@ -70,7 +70,7 @@ MaxDynamicServers 100
 ;V5R4: SI43221
 ;V6R1: SI43224
 ;V7R1: SI43222
-    
+
 ''' % name
 
 def get_fastcgi_http_add_conf(name):
