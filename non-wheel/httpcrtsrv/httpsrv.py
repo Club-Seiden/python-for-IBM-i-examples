@@ -319,7 +319,7 @@ def create(name, conf, port):
 
     verified = input(verification_text) or 'Y'
 
-    if verified in ['y', 'Y', 'yes', 'Yes', 'YES']:
+    if verified.lower*() in ['y', 'yes']:
         print('conf: %s' % conf)
         print('name: %s' % name)
         print('port: %s' % port)
