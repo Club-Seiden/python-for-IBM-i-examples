@@ -32,6 +32,50 @@ def get_index_html(name):
 </html>
 ''' % (name, name)
 
+def get_fastcgi_conf(name):
+    return '''; Static PHP servers for default user
+Server type="application/x-httpd-php" CommandLine="/usr/local/zendphp7/bin/php-cgi.bin" StartProcesses="1" SetEnv="LIBPATH=/usr/local/zendphp7/lib" SetEnv="PHPRC=/usr/local/zendphp7/etc/" SetEnv="PHP_FCGI_CHILDREN=10" SetEnv="PHP_FCGI_MAX_REQUESTS=0" ConnectionTimeout="30" RequestTimeout="60" SetEnv="CCSID=1208" SetEnv="LANG=C" SetEnv="INSTALLATION_UID=100313092679" SetEnv="LDR_CNTRL=MAXDATA=0x40000000" SetEnv="ZEND_TMPDIR=/usr/local/zendphp7/tmp" SetEnv="TZ=<EST>5<EDT>,M3.2.0,M11.1.0"
+
+; Where to place socket files
+IpcDir /www/%s/logs
+''' % name
+
+def get_fastcgi_conf_twn(name):
+    return '''; Static PHP servers for default user
+Server type="application/x-httpd-php" CommandLine="/usr/local/zendphp7/bin/php-cgi.bin" StartProcesses="1" SetEnv="LIBPATH=/usr/local/zendphp7/lib" SetEnv="PHPRC=/usr/local/zendphp7/etc/" SetEnv="PHP_FCGI_CHILDREN=10" SetEnv="PHP_FCGI_MAX_REQUESTS=0" ConnectionTimeout="30" RequestTimeout="60" SetEnv="CCSID=1208" SetEnv="LANG=C" SetEnv="INSTALLATION_UID=100313092679" SetEnv="LDR_CNTRL=MAXDATA=0x40000000" SetEnv="ZEND_TMPDIR=/usr/local/zendphp7/tmp" SetEnv="TZ=<EST>-5"
+
+; Where to place socket files
+IpcDir /www/%s/logs    
+''' % name
+
+def get_fastcgi_dynamic_conf(name):
+    return '''; Static PHP servers for default user
+DynamicServer type="application/x-httpd-php" MinProcesses=5 MaxProcesses=100 CommandLine="/usr/local/zendphp7/bin/php-cgi.bin" SetEnv="LIBPATH=/usr/local/zendphp7/lib" SetEnv="PHPRC=/usr/local/zendphp7/etc/" SetEnv="PHP_FCGI_CHILDREN=1" SetEnv="PHP_FCGI_MAX_REQUESTS=0" ConnectionTimeout="60" RequestTimeout="60" SetEnv="CCSID=1208" SetEnv="LANG=en_US" SetEnv="INSTALLATION_UID=100313092679" SetEnv="LDR_CNTRL=MAXDATA=0x40000000" SetEnv="TZ=<EST>5<EDT>,M3.2.0,M11.1.0"
+
+; Where to place socket files
+IpcDir /www/%s/logs
+
+;Minimum and Maximum of dynamic servers
+MinDynamicServers 5
+MaxDynamicServers 100
+
+
+;Usage of this configuration requires follwoing PASE and DG1 PTFs
+;PASE PTFs
+;V5R4: SI43218
+;V6R1: SI43243
+;V7R1: SI43244
+
+;DG1 PTFs
+;V5R4: SI43221
+;V6R1: SI43224
+;V7R1: SI43222
+    
+''' % name
+
+def get_fastcgi_http_add_conf(name):
+    return '''Include /www/%s/conf/apache-sites 
+''' % name
 
 def get_apache_conf(name, port):
     return '''# Apache Default server configuration
@@ -42,8 +86,8 @@ LoadModule proxy_ftp_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
 LoadModule zend_enabler_module /QSYS.LIB/QHTTPSVR.LIB/QZFAST.SRVPGM
 
 # zend fastcgi
-AddType application/x-httpd-db2 .db2
-AddHandler fastcgi-script .db2
+AddType application/x-httpd-php .php
+AddHandler fastcgi-script .php
 
 # General setup directives
 Listen *:%s
@@ -57,31 +101,42 @@ DocumentRoot /www/%s/htdocs
 AddLanguage en .en
 
 # protection (Basic)
-<Directory />       
-    Order Allow,Deny
-    Allow from all
+<Directory />
+   Order Deny,Allow 
+   Deny From all     
+</Directory>
+
+<Directory /www/%s/htdocs>
+  Options FollowSymLinks 
+  order allow,deny
+  allow from all
+  AllowOverride all
 </Directory>
 
 IncludeOptional /www/%s/conf/apache-sites/*.conf
-''' % (port, name, name)
+''' % (port, name, name, name)
 
 
 def get_zendsvr6_conf(name, port):
-    return '''LoadModule zend_enabler_module /QSYS.LIB/QHTTPSVR.LIB/QZFAST.SRVPGM
+    return '''LoadModule proxy_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
+LoadModule proxy_http_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
+LoadModule proxy_connect_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
+LoadModule proxy_ftp_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
+LoadModule zend_enabler_module /QSYS.LIB/QHTTPSVR.LIB/QZFAST.SRVPGM
 DefaultFsCCSID 37 
 CGIJobCCSID 37
 
 Listen *:%s
 DocumentRoot /www/%s/htdocs
+DirectoryIndex index.php index.html
 
 Options -ExecCGI -FollowSymLinks -SymLinksIfOwnerMatch -Includes -IncludesNoExec -Indexes -MultiViews
-LogFormat "%%h %%l %%u %%t \"%%r\" %%>s %%b \"%%{Referer}i\" \"%%{User-Agent}i\"" combined
-LogFormat "%%{Cookie}n \"%%r\" %%t" cookie
+LogFormat "%%h %%l %%u %%t \\"%%r\\" %%>s %%b \\"%%{Referer}i\\" \\"%%{User-Agent}i\\"" combined
+LogFormat "%%{Cookie}n \\"%%r\\" %%t" cookie
 LogFormat "%%{User-agent}i" agent
 LogFormat "%%{Referer}i -> %%U" referer
-LogFormat "%%h %%l %%u %%t \"%%r\" %%>s %%b" common
+LogFormat "%%h %%l %%u %%t \\"%%r\\" %%>s %%b" common
 CustomLog logs/access_log combined
-LogMaint logs/error_log 2 0
 SetEnvIf "User-Agent" "Mozilla/2" nokeepalive
 SetEnvIf "User-Agent" "JDK/1\.0" force-response-1.0
 SetEnvIf "User-Agent" "Java/1\.0" force-response-1.0
@@ -108,6 +163,13 @@ RewriteEngine on
 <Directory />
    Order Deny,Allow 
    Deny From all     
+</Directory>
+
+<Directory /www/%s/htdocs>
+  Options FollowSymLinks 
+  order allow,deny
+  allow from all
+  AllowOverride all
 </Directory>
 
 #XML Toolkit http settings
@@ -131,25 +193,29 @@ LogMaint /www/%s/logs/error_zfcgi 10 0
 LogMaintHour 3
 
 IncludeOptional /www/%s/conf/apache-sites/*.conf
-''' % (port, name, name, name, name, name)
+''' % (port, name, name, name, name, name, name)
 
 
 def get_zendphp7_conf(name, port):
-    return '''LoadModule zend_enabler_module /QSYS.LIB/QHTTPSVR.LIB/QZFAST.SRVPGM
+    return '''LoadModule proxy_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
+LoadModule proxy_http_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
+LoadModule proxy_connect_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
+LoadModule proxy_ftp_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
+LoadModule zend_enabler_module /QSYS.LIB/QHTTPSVR.LIB/QZFAST.SRVPGM
 DefaultFsCCSID 37 
 CGIJobCCSID 37    
 
 Listen *:%s
 DocumentRoot /www/%s/htdocs
+DirectoryIndex index.php index.html
 
 Options -ExecCGI -FollowSymLinks -SymLinksIfOwnerMatch -Includes -IncludesNoExec -Indexes -MultiViews
-LogFormat "%%dsh %%l %%u %%t \"%%r\" %%>s %%b \"%%{Referer}i\" \"%%{User-Agent}i\"" combined
-LogFormat "%%{Cookie}n \"%%r\" %%t" cookie
+LogFormat "%%h %%l %%u %%t \\"%%r\\" %%>s %%b \\"%%{Referer}i\\" \\"%%{User-Agent}i\\"" combined
+LogFormat "%%{Cookie}n \\"%%r\\" %%t" cookie
 LogFormat "%%{User-agent}i" agent
 LogFormat "%%{Referer}i -> %%U" referer
-LogFormat "%%h %%l %%u %%t \"%%r\" %%>s %%b" common
+LogFormat "%%h %%l %%u %%t \\"%%r\\" %%>s %%b" common
 CustomLog logs/access_log combined
-LogMaint logs/error_log 2 0
 SetEnvIf "User-Agent" "Mozilla/2" nokeepalive
 SetEnvIf "User-Agent" "JDK/1\.0" force-response-1.0
 SetEnvIf "User-Agent" "Java/1\.0" force-response-1.0
@@ -178,6 +244,13 @@ RewriteEngine on
    Deny From all     
 </Directory>
 
+<Directory /www/%s/htdocs>
+  Options FollowSymLinks 
+  order allow,deny
+  allow from all
+  AllowOverride all
+</Directory>
+
 #XML Toolkit http settings
 ScriptAlias /cgi-bin/ /QSYS.LIB/zendphp7.LIB/
 <Directory /QSYS.LIB/zendphp7.LIB/>
@@ -199,7 +272,7 @@ LogMaint /www/%s/logs/error_zfcgi 10 0
 LogMaintHour 3
 
 IncludeOptional /www/%s/conf/apache-sites/*.conf
-''' % (port, name, name, name, name, name)
+''' % (port, name, name, name, name, name, name)
 
 
 def get_example_vhost_conf(name, port):
@@ -231,11 +304,15 @@ def create(name, conf, port):
                 apache-sites/
                     example-vhost.conf
                 httpd.conf
-            example-project
+            example-project/
                 conf/
                     %s.conf
                 htdocs/
+                    index.html
                 logs/
+            htdocs/
+                index.html
+            logs/
 """ % (name, name)
 
     verification_text += "Does the above folder structure look correct? (Y/n) "
@@ -248,8 +325,24 @@ def create(name, conf, port):
         print('port: %s' % port)
         os.mkdir('%s' % path)
         os.mkdir('%s/conf' % path)
+        os.mkdir('%s/logs' % path)
+        os.mkdir('%s/htdocs' % path)
+        index_file = open("%s/htdocs/index.html" % path, "w+")
+        index_file.write(get_index_html(name))
 
         conf_file = open("%s/conf/httpd.conf" % path, "w+")
+        fastcgi_conf_file = open("%s/conf/fastcgi.conf" % path, "w+")
+        fastcgi_conf_twn_file = open("%s/conf/fastcgi.conf.twn" % path, "w+")
+        fastcgi_dynamic_conf_file = open("%s/conf/fastcgi_dynamic.conf" % path, "w+")
+        fastcgi_http_add_conf_file = open("%s/conf/fastcgi_http_add.conf" % path, "w+")
+        fastcgi_conf_file.write(get_fastcgi_conf(name))
+        fastcgi_conf_twn_file.write(get_fastcgi_conf_twn(name))
+        fastcgi_dynamic_conf_file.write(get_fastcgi_dynamic_conf(name))
+        fastcgi_http_add_conf_file.write(get_fastcgi_http_add_conf(name))
+        fastcgi_conf_file.close()
+        fastcgi_conf_twn_file.close()
+        fastcgi_dynamic_conf_file.close()
+        fastcgi_http_add_conf_file.close()
 
         if conf == "apache":
             conf_file.write(get_apache_conf(name, port))
@@ -268,7 +361,7 @@ def create(name, conf, port):
         vhost_file.close()
         os.mkdir('%s/example-project/htdocs' % path)
         index_file = open("%s/example-project/htdocs/index.html" % path, "w+")
-        index_file.write(get_example_vhost_conf(name, port))
+        index_file.write(get_index_html('Example Project'))
         index_file.close()
         os.mkdir('%s/example-project/logs' % path)
         os.symlink("%s/example-project/conf/%s.conf" % (path, name), "%s/conf/apache-sites/example-project.conf" % path)
