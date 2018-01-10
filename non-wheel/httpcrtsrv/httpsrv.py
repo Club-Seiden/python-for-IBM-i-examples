@@ -5,15 +5,15 @@ import os
 # from itoolkit import *
 import ibm_db_dbi as db2
 
-#######################################################################
-#                                                                     #
-# Issues                                                              #
-#                                                                     #
-# Using SQL to create an HTTP Server Instance does not work properly. #
+#########################################################################
+#                                                                       #
+# Issues                                                                #
+#                                                                       #
+# Using SQL to create an HTTP Server Instance does not work properly.   #
 # The `mod_info_query` does not have any effect, so the new HTTP Server #
-# does not point at the correct httpd.conf                            #
-#                                                                     #
-#######################################################################
+# does not point at the correct httpd.conf                              #
+#                                                                       #
+#########################################################################
 
 
 def get_index_html(name):
