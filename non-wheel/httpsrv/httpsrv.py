@@ -32,6 +32,7 @@ def get_index_html(name):
 </html>
 ''' % (name, name)
 
+
 def get_fastcgi_conf(name):
     return '''; Static PHP servers for default user
 Server type="application/x-httpd-php" CommandLine="/usr/local/zendphp7/bin/php-cgi.bin" StartProcesses="1" SetEnv="LIBPATH=/usr/local/zendphp7/lib" SetEnv="PHPRC=/usr/local/zendphp7/etc/" SetEnv="PHP_FCGI_CHILDREN=10" SetEnv="PHP_FCGI_MAX_REQUESTS=0" ConnectionTimeout="30" RequestTimeout="60" SetEnv="CCSID=1208" SetEnv="LANG=C" SetEnv="INSTALLATION_UID=100313092679" SetEnv="LDR_CNTRL=MAXDATA=0x40000000" SetEnv="ZEND_TMPDIR=/usr/local/zendphp7/tmp" SetEnv="TZ=<EST>5<EDT>,M3.2.0,M11.1.0"
@@ -40,6 +41,7 @@ Server type="application/x-httpd-php" CommandLine="/usr/local/zendphp7/bin/php-c
 IpcDir /www/%s/logs
 ''' % name
 
+
 def get_fastcgi_conf_twn(name):
     return '''; Static PHP servers for default user
 Server type="application/x-httpd-php" CommandLine="/usr/local/zendphp7/bin/php-cgi.bin" StartProcesses="1" SetEnv="LIBPATH=/usr/local/zendphp7/lib" SetEnv="PHPRC=/usr/local/zendphp7/etc/" SetEnv="PHP_FCGI_CHILDREN=10" SetEnv="PHP_FCGI_MAX_REQUESTS=0" ConnectionTimeout="30" RequestTimeout="60" SetEnv="CCSID=1208" SetEnv="LANG=C" SetEnv="INSTALLATION_UID=100313092679" SetEnv="LDR_CNTRL=MAXDATA=0x40000000" SetEnv="ZEND_TMPDIR=/usr/local/zendphp7/tmp" SetEnv="TZ=<EST>-5"
@@ -47,6 +49,7 @@ Server type="application/x-httpd-php" CommandLine="/usr/local/zendphp7/bin/php-c
 ; Where to place socket files
 IpcDir /www/%s/logs    
 ''' % name
+
 
 def get_fastcgi_dynamic_conf(name):
     return '''; Static PHP servers for default user
@@ -73,9 +76,11 @@ MaxDynamicServers 100
 
 ''' % name
 
+
 def get_fastcgi_http_add_conf(name):
     return '''Include /www/%s/conf/apache-sites 
 ''' % name
+
 
 def get_apache_conf(name, port):
     return '''# Apache Default server configuration
@@ -330,28 +335,18 @@ def create(name, conf, port):
         index_file = open("%s/htdocs/index.html" % path, "w+")
         index_file.write(get_index_html(name))
 
-        conf_file = open("%s/conf/httpd.conf" % path, "w+")
-        fastcgi_conf_file = open("%s/conf/fastcgi.conf" % path, "w+")
-        fastcgi_conf_twn_file = open("%s/conf/fastcgi.conf.twn" % path, "w+")
-        fastcgi_dynamic_conf_file = open("%s/conf/fastcgi_dynamic.conf" % path, "w+")
-        fastcgi_http_add_conf_file = open("%s/conf/fastcgi_http_add.conf" % path, "w+")
-        fastcgi_conf_file.write(get_fastcgi_conf(name))
-        fastcgi_conf_twn_file.write(get_fastcgi_conf_twn(name))
-        fastcgi_dynamic_conf_file.write(get_fastcgi_dynamic_conf(name))
-        fastcgi_http_add_conf_file.write(get_fastcgi_http_add_conf(name))
-        fastcgi_conf_file.close()
-        fastcgi_conf_twn_file.close()
-        fastcgi_dynamic_conf_file.close()
-        fastcgi_http_add_conf_file.close()
+        with open("%s/conf/fastcgi.conf" % path, "w+") as file:
+            file.write(get_fastcgi_conf(name))
+        with open("%s/conf/fastcgi.conf.twn" % path, "w+") as file:
+            file.write(get_fastcgi_conf_twn(name))
+        with open("%s/conf/fastcgi_dynamic.conf" % path, "w+") as file:
+            file.write(get_fastcgi_dynamic_conf(name))
+        with open("%s/conf/fastcgi_http_add.conf" % path, "w+") as file:
+            file.write(get_fastcgi_http_add_conf(name))
 
-        if conf == "apache":
-            conf_file.write(get_apache_conf(name, port))
-        elif conf == "zendphp7":
-            conf_file.write(get_zendphp7_conf(name, port))
-        elif conf == "zendsvr6":
-            conf_file.write(get_zendsvr6_conf(name, port))
-
-        conf_file.close()
+        get_conf = globals()['get_{}_conf'.format(conf)]
+        with open("%s/conf/httpd.conf" % path, "w+") as conf_file:
+            conf_file.write(get_conf(name, port))
 
         os.mkdir('%s/conf/apache-sites' % path)
         os.mkdir('%s/example-project' % path)
