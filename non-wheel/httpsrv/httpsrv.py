@@ -403,6 +403,18 @@ def create_with_qzui_api():
     # itool.call(config.itransport)
 
 
+def delete_with_qzui_api(name):
+    print('delete')
+    # Use QzuiDeleteInstance to delete HTTP Server Instance
+
+
+def rename(name, newname):
+    print ('rename')
+    # Could not find a command for this one. Only idea is to use CHGPF or some command to change the member name
+    # rerun command to update update apache configuration path
+    # Then mv directory to rename directory
+
+
 def main():
     p = argparse.ArgumentParser()
     sp = p.add_subparsers(title='commands', dest='command')
@@ -422,14 +434,11 @@ def main():
     args = p.parse_args()
 
     if args.command == 'create':
-        if len(args.name) <= 10:
-            create(args.name, args.conf, args.port)
-        else:
-            p.error('Name must be 10 characters or less')
+        create(args.name, args.conf, args.port)
     elif args.command == 'rename':
-        print('rename')
+        rename(args.name, args.newname)
     elif args.command == 'delete':
-        print('delete')
+        delete_with_qzui_api(args.name)
 
 
 if __name__ == '__main__':
