@@ -409,10 +409,22 @@ def delete_with_qzui_api(name):
 
 
 def rename(name, newname):
-    print ('rename')
+    print('rename')
     # Could not find a command for this one. Only idea is to use CHGPF or some command to change the member name
     # rerun command to update update apache configuration path
     # Then mv directory to rename directory
+
+
+def start(name):
+    os.system("system 'STRTCPSVR SERVER(*HTTP) HTTPSVR(" + name.upper() + ")'")
+
+
+def restart(name):
+    os.system("system 'STRTCPSVR SERVER(*HTTP) RESTART(*HTTP) HTTPSVR(" + name.upper() + ")'")
+
+
+def stop(name):
+    os.system("system 'ENDTCPSVR SERVER(*HTTP) HTTPSVR(" + name.upper() + ")'")
 
 
 def main():
@@ -428,8 +440,17 @@ def main():
     p_rename.add_argument('--name', '-n', required=True)
     p_rename.add_argument('--newname', '-e', required=True)
 
-    p_rename = sp.add_parser('delete', help='Delete HTTP Server Instance')
-    p_rename.add_argument('--name', '-n', required=True)
+    p_delete = sp.add_parser('delete', help='Delete HTTP Server Instance')
+    p_delete.add_argument('--name', '-n', required=True)
+
+    p_start = sp.add_parser('start', help='Start HTTP Server Instance')
+    p_start.add_argument('--name', '-n', required=True)
+
+    p_restart = sp.add_parser('restart', help='Restart HTTP Server Instance')
+    p_restart.add_argument('--name', '-n', required=True)
+
+    p_stop = sp.add_parser('stop', help='Stop HTTP Server Instance')
+    p_stop.add_argument('--name', '-n', required=True)
 
     args = p.parse_args()
 
@@ -439,6 +460,12 @@ def main():
         rename(args.name, args.newname)
     elif args.command == 'delete':
         delete_with_qzui_api(args.name)
+    elif args.command == 'start':
+        start(args.name)
+    elif args.command == 'restart':
+        restart(args.name)
+    elif args.command == 'stop':
+        stop(args.name)
 
 
 if __name__ == '__main__':
