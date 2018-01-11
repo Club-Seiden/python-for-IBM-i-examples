@@ -397,37 +397,32 @@ def create_with_qzui_api():
 
 
 def main():
-    usage = '''python3 httpsrv.py (-c|d|r) [--conf=<template>] [--name=<name>] [--port=<number>] [--newname=<name>]
-python3 httpsrv.py -c --conf=zendsvr6 --name=test --port=10090
-python3 httpsrv.py -r --name=test --newname=develop
-python3 httpsrv.py -d --name=develop'''
-    p = argparse.ArgumentParser(usage=usage)
-    group = p.add_mutually_exclusive_group(required=True)
-    group.add_argument('-c', action='store_true', dest="create", help='Create HTTP Server Instance')
-    group.add_argument('-d', action='store_true', dest="delete", help='Delete HTTP Server Instance')
-    group.add_argument('-r', action='store_true', dest="rename", help='Rename HTTP Server Instance')
-    p.add_argument('--conf', '-t', default="zendphp7",
-         help='Template to use for Apache Config. zendphp7|zendsvr6|apache [default: zendphp7]')
-    p.add_argument('--name', '-n', help="Name of HTTP Server Instance")
-    p.add_argument('--newname', '-e', help="New name for HTTP Server Instance")
-    p.add_argument('--port', '-p', help="Default port for HTTP Server Instance")
+    p = argparse.ArgumentParser()
+    sp = p.add_subparsers(title='commands', dest='command')
+
+    p_create = sp.add_parser('create', help='Create HTTP Server Instance')
+    p_create.add_argument('--conf', '-t', default="zendphp7", choices=['zendphp7', 'zendsvr6', 'apache'])
+    p_create.add_argument('--name', '-n', required=True)
+    p_create.add_argument('--port', '-p', required=True)
+
+    p_rename = sp.add_parser('rename', help='Rename HTTP Server Instance')
+    p_rename.add_argument('--name', '-n', required=True)
+    p_rename.add_argument('--newname', '-e', required=True)
+
+    p_rename = sp.add_parser('delete', help='Delete HTTP Server Instance')
+    p_rename.add_argument('--name', '-n', required=True)
+
     args = p.parse_args()
 
-    # TODO - This can also be done with subparsers, but you would have to change to using positional
-    # arguments instead of flags for --create, --rename, and --delete:
-    # https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.add_subparsers
-    # TODO - Can be accomplished with the choices parameter to add_argument
-    if args.create:
-        if len([x for x in (args.name, args.conf, args.port) if x is not False]) == 3:
-            if args.conf in ['apache', 'zendphp7', 'zendsvr6']:
-                if len(args.name) <= 10:
-                    create(args.name, args.conf, args.port)
-                else:
-                    p.error('Name must be 10 characters or less')
-            else:
-                p.error('--conf=apache|zendphp7|zendsvr6')
+    if args.command == 'create':
+        if len(args.name) <= 10:
+            create(args.name, args.conf, args.port)
         else:
-            p.error('--name, --conf, --port are all required when creating an HTTP Server Instance')
+            p.error('Name must be 10 characters or less')
+    elif args.command == 'rename':
+        print('rename')
+    elif args.command == 'delete':
+        print('delete')
 
 
 if __name__ == '__main__':
