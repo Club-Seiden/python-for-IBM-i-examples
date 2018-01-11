@@ -15,8 +15,6 @@ import ibm_db_dbi as db2
 #                                                                       #
 #########################################################################
 
-# TODO - Use .format()
-
 
 def get_index_html(name):
     return '''<!doctype html>
@@ -74,7 +72,6 @@ MaxDynamicServers 100
 ;V5R4: SI43221
 ;V6R1: SI43224
 ;V7R1: SI43222
-
 '''.format(name)
 
 
@@ -282,8 +279,7 @@ IncludeOptional /www/{1}/conf/apache-sites/*.conf
 
 
 def get_example_vhost_conf(name, port):
-    return '''
-<VirtualHost *:{0}>
+    return '''<VirtualHost *:{0}>
     ServerName {1}.domain.com
     DocumentRoot /www/{1}/example-project/htdocs
 
@@ -303,22 +299,21 @@ def get_example_vhost_conf(name, port):
 
 def create(name, conf, port):
     path = '/www/{}'.format(name)
-    verification_text = '''
-    /www/
-        {0}/
+    verification_text = '''/www/
+    {0}/
+        conf/
+            apache-sites/
+                example-vhost.conf
+            httpd.conf
+        example-project/
             conf/
-                apache-sites/
-                    example-vhost.conf
-                httpd.conf
-            example-project/
-                conf/
-                    {0}.conf
-                htdocs/
-                    index.html
-                logs/
+                {0}.conf
             htdocs/
                 index.html
             logs/
+        htdocs/
+            index.html
+        logs/
 '''.format(name)
 
     verification_text += "Does the above folder structure look correct? (Y/n) "
@@ -349,17 +344,14 @@ def create(name, conf, port):
         with open("{}/conf/httpd.conf".format(path), "w+") as conf_file:
             conf_file.write(get_conf(name, port))
 
-        # TODO - Use `with` for other file opening and such.
         os.mkdir('{}/conf/apache-sites'.format(path))
         os.mkdir('{}/example-project'.format(path))
         os.mkdir('{}/example-project/conf'.format(path))
-        vhost_file = open("{}/example-project/conf/{}.conf".format(path, name), "w+")
-        vhost_file.write(get_example_vhost_conf(name, port))
-        vhost_file.close()
+        with open("{}/example-project/conf/{}.conf".format(path, name), "w+") as file:
+            file.write(get_example_vhost_conf(name, port))
         os.mkdir('{}/example-project/htdocs'.format(path))
-        index_file = open("{}/example-project/htdocs/index.html".format(path), "w+")
-        index_file.write(get_index_html('Example Project'))
-        index_file.close()
+        with open("{}/example-project/htdocs/index.html".format(path), "w+") as file:
+            file.write(get_index_html('Example Project'))
         os.mkdir('{}/example-project/logs'.format(path))
         os.symlink(
             "{}/example-project/conf/{}.conf".format(path, name),
@@ -383,10 +375,8 @@ def create_with_sql(name):
     query = 'create or replace alias QUSRSYS.QATMHINSTC_{0} for QUSRSYS.QATMHINSTC({0})'.format(name)
     cur.execute(query)
 
-    query = '''
-update QUSRSYS.QATMHINSTC_{0}
-set CHARFIELD = '-apache -d /www/{0} -f conf/httpd.conf -AutoStartN' with NC
-'''.format(name)
+    query = '''update QUSRSYS.QATMHINSTC_{0}
+set CHARFIELD = '-apache -d /www/{0} -f conf/httpd.conf -AutoStartN' with NC'''.format(name)
     cur.execute(query)
 
     conn.commit()
@@ -407,27 +397,21 @@ def create_with_qzui_api():
 
 
 def main():
-    usage = '''
-    python3 httpsrv.py (-c|d|r) [--conf=<template>] [--name=<name>] [--port=<number>] [--newname=<name>]
-    python3 httpsrv.py -c --conf=zendsvr6 --name=test --port=10090
-    python3 httpsrv.py -r --name=test --newname=develop
-    python3 httpsrv.py -d --name=develop
-'''
-    p = argparse.ArgumentParser(usage)
-    p.add_argument('-c', action='store_true', dest="create", help='Create HTTP Server Instance')
-    p.add_argument('-d', action='store_true', dest="delete", help='Delete HTTP Server Instance')
-    p.add_argument('-r', action='store_true', dest="rename", help='Rename HTTP Server Instance')
+    usage = '''python3 httpsrv.py (-c|d|r) [--conf=<template>] [--name=<name>] [--port=<number>] [--newname=<name>]
+python3 httpsrv.py -c --conf=zendsvr6 --name=test --port=10090
+python3 httpsrv.py -r --name=test --newname=develop
+python3 httpsrv.py -d --name=develop'''
+    p = argparse.ArgumentParser(usage=usage)
+    group = p.add_mutually_exclusive_group(required=True)
+    group.add_argument('-c', action='store_true', dest="create", help='Create HTTP Server Instance')
+    group.add_argument('-d', action='store_true', dest="delete", help='Delete HTTP Server Instance')
+    group.add_argument('-r', action='store_true', dest="rename", help='Rename HTTP Server Instance')
     p.add_argument('--conf', '-t', default="zendphp7",
          help='Template to use for Apache Config. zendphp7|zendsvr6|apache [default: zendphp7]')
     p.add_argument('--name', '-n', help="Name of HTTP Server Instance")
     p.add_argument('--newname', '-e', help="New name for HTTP Server Instance")
     p.add_argument('--port', '-p', help="Default port for HTTP Server Instance")
     args = p.parse_args()
-
-    # TODO - Better to do this with a mutually exclusive argument group:
-    # https://docs.python.org/3/library/argparse.html#mutual-exclusion
-    if len([x for x in (args.create, args.delete, args.rename) if x is not False]) != 1:
-        p.error('args -c, -d, and -r cannot be used together.')
 
     # TODO - This can also be done with subparsers, but you would have to change to using positional
     # arguments instead of flags for --create, --rename, and --delete:
