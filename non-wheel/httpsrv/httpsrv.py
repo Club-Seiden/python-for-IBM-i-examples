@@ -15,22 +15,23 @@ import ibm_db_dbi as db2
 #                                                                       #
 #########################################################################
 
+# TODO - Use .format()
+
 
 def get_index_html(name):
-    return '''
-<!doctype html>
+    return '''<!doctype html>
 <html class="no-js" lang="">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title>%s Works</title>
+        <title>{0} Works</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     </head>
     <body>
-        <h1>%s works!!!</h1>
+        <h1>{0} works!!!</h1>
     </body>
 </html>
-''' % (name, name)
+'''.format(name)
 
 
 def get_fastcgi_conf(name):
@@ -348,6 +349,7 @@ def create(name, conf, port):
         with open("%s/conf/httpd.conf" % path, "w+") as conf_file:
             conf_file.write(get_conf(name, port))
 
+        # TODO - Use `with` for other file opening and such.
         os.mkdir('%s/conf/apache-sites' % path)
         os.mkdir('%s/example-project' % path)
         os.mkdir('%s/example-project/conf' % path)
@@ -371,20 +373,20 @@ def create_with_sql(name):
     cur = conn.cursor()
 
     sys_cmd = "CPYF FROMFILE(QUSRSYS/QATMHINSTC) TOFILE(QUSRSYS/QATMHINSTC) " +\
-            "FROMMBR(APACHEDFT) TOMBR(%s) MBROPT(*REPLACE)" % name
-    crt_http_svr = "call qcmdexc('%s');" % sys_cmd
+        "FROMMBR(APACHEDFT) TOMBR({}) MBROPT(*REPLACE)".format(name)
+    crt_http_svr = "call qcmdexc('{}');".format(sys_cmd)
     cur.execute(crt_http_svr)
 
-    # This is the part that does not work properly.
-    mod_info_query = '''
-create or replace alias QUSRSYS.QATMHINSTC_%s for QUSRSYS.QATMHINSTC(%s);
-update QUSRSYS.QATMHINSTC_%s
-set CHARFIELD = '-apache -d /www/%s -f conf/httpd.conf -AutoStartN';
-''' % (name, name, name, name)
+    query = 'create or replace alias QUSRSYS.QATMHINSTC_{0} for QUSRSYS.QATMHINSTC({0})'.format(name)
+    cur.execute(query)
 
-    cur.execute(mod_info_query)
+    query = '''
+update QUSRSYS.QATMHINSTC_{0}
+set CHARFIELD = '-apache -d /www/{0} -f conf/httpd.conf -AutoStartN' with NC
+'''.format(name)
+    cur.execute(query)
+
     conn.commit()
-
     cur.close()
     conn.close()
 
@@ -419,9 +421,15 @@ def main():
     p.add_argument('--port', '-p', help="Default port for HTTP Server Instance")
     args = p.parse_args()
 
+    # TODO - Better to do this with a mutually exclusive argument group:
+    # https://docs.python.org/3/library/argparse.html#mutual-exclusion
     if len([x for x in (args.create, args.delete, args.rename) if x is not False]) != 1:
         p.error('args -c, -d, and -r cannot be used together.')
 
+    # TODO - This can also be done with subparsers, but you would have to change to using positional
+    # arguments instead of flags for --create, --rename, and --delete:
+    # https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.add_subparsers
+    # TODO - Can be accomplished with the choices parameter to add_argument
     if args.create:
         if len([x for x in (args.name, args.conf, args.port) if x is not False]) == 3:
             if args.conf in ['apache', 'zendphp7', 'zendsvr6']:
