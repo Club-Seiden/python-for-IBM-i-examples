@@ -305,7 +305,7 @@ def get_example_vhost_conf(name, port):
 
 
 def create(name, conf, port):
-    path = '/www/{}'.format(name)
+    path = '/www/' + name
     verification_text = '''/www/
     {0}/
         conf/
@@ -328,41 +328,41 @@ def create(name, conf, port):
     verified = input(verification_text) or 'Y'
 
     if verified.lower() in ['y', 'yes']:
-        print('conf: {}'.format(conf))
-        print('name: {}'.format(name))
-        print('port: {}'.format(port))
-        os.mkdir('{}'.format(path))
-        os.mkdir('{}/conf'.format(path))
-        os.mkdir('{}/logs'.format(path))
-        os.mkdir('{}/htdocs'.format(path))
-        index_file = open("{}/htdocs/index.html".format(path), "w+")
+        print('conf: ' + conf)
+        print('name: ' + name)
+        print('port: ' + port)
+        os.mkdir(path)
+        os.mkdir(path + '/conf')
+        os.mkdir(path + '/logs')
+        os.mkdir(path + '/htdocs')
+        index_file = open(path + '/htdocs/index.html', "w+")
         index_file.write(get_index_html(name))
 
-        with open("{}/conf/fastcgi.conf".format(path), "w+") as file:
+        with open(path + '/conf/fastcgi.conf', "w+") as file:
             file.write(get_fastcgi_conf(name))
-        with open("{}/conf/fastcgi.conf.twn".format(path), "w+") as file:
+        with open(path + '/conf/fastcgi.conf.twn', "w+") as file:
             file.write(get_fastcgi_conf_twn(name))
-        with open("{}/conf/fastcgi_dynamic.conf".format(path), "w+") as file:
+        with open(path + '/conf/fastcgi_dynamic.conf', "w+") as file:
             file.write(get_fastcgi_dynamic_conf(name))
-        with open("{}/conf/fastcgi_http_add.conf".format(path), "w+") as file:
+        with open(path + '/conf/fastcgi_http_add.conf', "w+") as file:
             file.write(get_fastcgi_http_add_conf(name))
 
         get_conf = globals()['get_{}_conf'.format(conf)]
-        with open("{}/conf/httpd.conf".format(path), "w+") as conf_file:
+        with open(path + '/conf/httpd.conf', "w+") as conf_file:
             conf_file.write(get_conf(name, port))
 
-        os.mkdir('{}/conf/apache-sites'.format(path))
-        os.mkdir('{}/example-project'.format(path))
-        os.mkdir('{}/example-project/conf'.format(path))
+        os.mkdir(path + '/conf/apache-sites')
+        os.mkdir(path + '/example-project')
+        os.mkdir(path + '/example-project/conf')
         with open("{}/example-project/conf/{}.conf".format(path, name), "w+") as file:
             file.write(get_example_vhost_conf(name, port))
-        os.mkdir('{}/example-project/htdocs'.format(path))
-        with open("{}/example-project/htdocs/index.html".format(path), "w+") as file:
+        os.mkdir(path + '/example-project/htdocs')
+        with open(path + '/example-project/htdocs/index.html', "w+") as file:
             file.write(get_index_html('Example Project'))
-        os.mkdir('{}/example-project/logs'.format(path))
+        os.mkdir(path + '/example-project/logs')
         os.symlink(
             "{}/example-project/conf/{}.conf".format(path, name),
-            "{}/conf/apache-sites/example-project.conf".format(path)
+            path + '/conf/apache-sites/example-project.conf'
         )
 
         create_with_sql(name)
