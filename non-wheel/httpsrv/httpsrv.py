@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 import os
-# import config
-# from itoolkit import *
+from itoolkit import *
+from itoolkit.lib.ilibcall import *
 import ibm_db_dbi as db2
 
 #########################################################################
@@ -365,6 +365,7 @@ def create(name, conf, port):
             path + '/conf/apache-sites/example-project.conf'
         )
 
+        # create_with_qzui_api(name)
         create_with_sql(name)
 
 
@@ -393,14 +394,54 @@ set CHARFIELD = '-apache -d /www/{0} -f conf/httpd.conf -AutoStartN' with NC'''.
 
 # This is the part that needs a lot of help.
 # I (Josh) do not know the Python Toolkit for IBM i. I'm willing to learn.
-def create_with_qzui_api():
+def create_with_qzui_api(name):
+    itransport = iLibCall()
     itool = iToolKit()
-    # itool.add(
-    #     iSrvPgm('qzuicrtins', 'QZUICRTINS', 'QzuiCreateInstance')
-    #         .addParm(iData('name', '10a', options.devenv))
-    #     # .addParm('idata', '')
-    # )
-    # itool.call(config.itransport)
+
+    itool.add(iCmd('addlible', 'addlible QHTTPSVR'))
+    itool.add(
+        iSrvPgm('QzuiCreateInstance', 'QZHBCONF', 'QzuiCreateInstance',
+                iopt={'lib': 'QHTTPSVR'})  # This doesn't seem to work, thus the ADDLIBLE above
+            .addParm(iData('instance', '10a', name.upper()))
+            .addParm(
+                iDS('INSD0110', {'len': 'buflen'})
+                    .addData(iData('autostart', '10a', '*NO'))
+                    .addData(iData('threads', '10i0', '0'))
+                    .addData(iData('ccsid', '10i0', '37'))
+                    .addData(iData('out_table_name', '10a', '*GLOBAL'))
+                    .addData(iData('out_table_lib', '10a', '*GLOBAL'))
+                    .addData(iData('in_table_name', '10a', '*GLOBAL'))
+                    .addData(iData('in_table_lib', '10a', '*GLOBAL'))
+                    .addData(iData('config_file', '512a', '/www/' + name.lower() + '/httpd.conf'))
+                    .addData(iData('server_root', '512a', '/www/' + name.lower()))
+            )
+            .addParm(iData('bufsize', '10i0', '', {'setlen': 'buflen'}))
+            .addParm(iData('format', '10a', 'INSD0110'))
+            .addParm(
+                iDS('qus_ec_t', {'len': 'errlen'})
+                    .addData(iData('provided', '10i0', '', {'setlen': 'errlen'}))
+                    .addData(iData('available', '10i0', ''))
+                    .addData(iData('msgid', '7A', ''))
+                    .addData(iData('reserved', '1A', ''))
+                    # These are defined specifically for CPF3C1D
+                    .addData(iData('parameter', '10i0', ''))
+                    .addData(iData('parmlen', '10i0', ''))
+                    .addData(iData('minlen', '10i0', ''))
+                    .addData(iData('maxlen', '10i0', ''))
+            )
+    )
+
+    itool.call(itransport)
+
+    result = itool.dict_out('QzuiCreateInstance')
+    # print(result)
+    err = result['qus_ec_t']
+    if int(err['available']):
+        if err['msgid'] == 'CPF3C1D':
+            print("{4}: The length of {0} for parameter {1} is not valid. Values for this parameter must be greater than {2} and less than {3}.".format(
+                    err['parmlen'], err['parameter'], err['minlen'], err['maxlen'], err['msgid']))
+        else:
+            print(err['msgid'])
 
 
 def delete_with_qzui_api(name):
