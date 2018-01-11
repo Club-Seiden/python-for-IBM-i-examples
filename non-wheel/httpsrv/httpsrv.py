@@ -62,7 +62,7 @@ MinDynamicServers 5
 MaxDynamicServers 100
 
 
-;Usage of this configuration requires follwoing PASE and DG1 PTFs
+;Usage of this configuration requires following PASE and DG1 PTFs
 ;PASE PTFs
 ;V5R4: SI43218
 ;V6R1: SI43243
