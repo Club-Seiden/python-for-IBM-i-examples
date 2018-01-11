@@ -99,7 +99,7 @@ HostNameLookups Off
 UseCanonicalName On
 TimeOut 30000
 KeepAlive On
-KeepAliveTimeout 
+KeepAliveTimeout 5
 DocumentRoot /www/{1}/htdocs
 AddLanguage en .en
 
