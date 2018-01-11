@@ -80,6 +80,20 @@ def get_fastcgi_http_add_conf(name):
 '''.format(name)
 
 
+def get_req_all(s):
+    un = os.uname()
+    version = (int(un.version), int(un.release))
+    if version > (7, 1):
+        return 'Require all ' + s
+    else:
+        if s == 'granted':
+            return '''order allow,deny
+allow from all'''
+        else:
+            return '''order deny,allow
+deny from all'''
+
+
 def get_apache_conf(name, port):
     return '''# Apache Default server configuration
 LoadModule proxy_module /QSYS.LIB/QHTTPSVR.LIB/QZSRCORE.SRVPGM
@@ -105,19 +119,17 @@ AddLanguage en .en
 
 # protection (Basic)
 <Directory />
-   Order Deny,Allow 
-   Deny From all     
+    {2}   
 </Directory>
 
 <Directory /www/{1}/htdocs>
-  Options FollowSymLinks 
-  order allow,deny
-  allow from all
-  AllowOverride all
+    Options FollowSymLinks 
+    {3}
+    AllowOverride all
 </Directory>
 
 IncludeOptional /www/{1}/conf/apache-sites/*.conf
-'''.format(port, name)
+'''.format(port, name, get_req_all('denied'), get_req_all('granted'))
 
 
 def get_zendsvr6_conf(name, port):
@@ -164,15 +176,13 @@ AddHandler fastcgi-script .php
 RewriteEngine on 
 
 <Directory />
-   Order Deny,Allow 
-   Deny From all     
+    {2}
 </Directory>
 
 <Directory /www/{1}/htdocs>
-  Options FollowSymLinks 
-  order allow,deny
-  allow from all
-  AllowOverride all
+    Options FollowSymLinks 
+    {3}
+    AllowOverride all
 </Directory>
 
 #XML Toolkit http settings
@@ -196,7 +206,7 @@ LogMaint /www/{1}/logs/error_zfcgi 10 0
 LogMaintHour 3
 
 IncludeOptional /www/{1}/conf/apache-sites/*.conf
-'''.format(port, name)
+'''.format(port, name, get_req_all('denied'), get_req_all('granted'))
 
 
 def get_zendphp7_conf(name, port):
@@ -243,23 +253,20 @@ AddHandler fastcgi-script .php
 RewriteEngine on 
 
 <Directory />
-   Order Deny,Allow 
-   Deny From all     
+    {2}    
 </Directory>
 
 <Directory /www/{1}/htdocs>
-  Options FollowSymLinks 
-  order allow,deny
-  allow from all
-  AllowOverride all
+    Options FollowSymLinks 
+    {3}
+    AllowOverride all
 </Directory>
 
 #XML Toolkit http settings
 ScriptAlias /cgi-bin/ /QSYS.LIB/zendphp7.LIB/
 <Directory /QSYS.LIB/zendphp7.LIB/>
     AllowOverride None
-    order allow,deny
-    allow from all
+    {3}
     SetHandler cgi-script
     Options +ExecCGI
 </Directory>
@@ -275,7 +282,7 @@ LogMaint /www/{1}/logs/error_zfcgi 10 0
 LogMaintHour 3
 
 IncludeOptional /www/{1}/conf/apache-sites/*.conf
-'''.format(port, name)
+'''.format(port, name, get_req_all('denied'), get_req_all('granted'))
 
 
 def get_example_vhost_conf(name, port):
@@ -285,8 +292,8 @@ def get_example_vhost_conf(name, port):
 
     <Directory "/www/{1}/example-project/htdocs">
         Options Indexes FollowSymLinks
+        {2}
         AllowOverride All
-        Require all granted
         DirectoryIndex index.php index.html
     </Directory>
 
@@ -294,7 +301,7 @@ def get_example_vhost_conf(name, port):
     ErrorLog "/www/{1}/example-project/logs/error_log"
     CustomLog "/www/{1}/example-project/logs/access_log" common
 </VirtualHost>
-'''.format(port, name)
+'''.format(port, name, get_req_all('granted'))
 
 
 def create(name, conf, port):
