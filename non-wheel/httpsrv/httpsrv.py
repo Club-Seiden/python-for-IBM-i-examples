@@ -533,7 +533,11 @@ def main():
     elif args.command == 'rename':
         rename_with_sql(args.name, args.newname)
     elif args.command == 'delete':
-        delete_with_sql(args.name)
+        verification_text = 'Are you sure you want to delete {}? This cannot be undone. (y/N) '.format(args.name)
+        verified = input(verification_text) or 'n'
+
+        if verified.lower() in ['y', 'yes']:
+            delete_with_sql(args.name)
     elif args.command == 'start':
         start(args.name)
     elif args.command == 'restart':
