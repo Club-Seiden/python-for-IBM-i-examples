@@ -4,6 +4,7 @@ import os
 from itoolkit import *
 from itoolkit.lib.ilibcall import *
 import ibm_db_dbi as db2
+import shutil
 
 #########################################################################
 #                                                                       #
@@ -449,6 +450,22 @@ def delete_with_qzui_api(name):
     # Use QzuiDeleteInstance to delete HTTP Server Instance
 
 
+def delete_with_sql(name):
+    # This connection is for the SQL way of creating an HTTP Server Instance.
+    conn = db2.connect()
+    cur = conn.cursor()
+
+    sys_cmd = 'RMVM FILE(QUSRSYS/QATMHINSTC) MBR({})'.format(name)
+    crt_http_svr = "call qcmdexc('{}');".format(sys_cmd)
+    cur.execute(crt_http_svr)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    shutil.rmtree('/www/' + name.lower())
+
+
 def rename(name, newname):
     print('rename')
     # Could not find a command for this one. Only idea is to use CHGPF or some command to change the member name
@@ -500,7 +517,7 @@ def main():
     elif args.command == 'rename':
         rename(args.name, args.newname)
     elif args.command == 'delete':
-        delete_with_qzui_api(args.name)
+        delete_with_sql(args.name)
     elif args.command == 'start':
         start(args.name)
     elif args.command == 'restart':
