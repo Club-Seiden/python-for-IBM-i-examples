@@ -372,7 +372,6 @@ def create(name, conf, port):
 
 # Hopefully to go away in favor of create_with_qzui_api
 def create_with_sql(name):
-    # This connection is for the SQL way of creating an HTTP Server Instance.
     conn = db2.connect()
     cur = conn.cursor()
 
@@ -451,7 +450,6 @@ def delete_with_qzui_api(name):
 
 
 def delete_with_sql(name):
-    # This connection is for the SQL way of creating an HTTP Server Instance.
     conn = db2.connect()
     cur = conn.cursor()
 
@@ -471,6 +469,28 @@ def rename(name, newname):
     # Could not find a command for this one. Only idea is to use CHGPF or some command to change the member name
     # rerun command to update update apache configuration path
     # Then mv directory to rename directory
+
+
+def rename_with_sql(name, newname):
+    conn = db2.connect()
+    cur = conn.cursor()
+
+    sys_cmd = 'RNMM FILE(QUSRSYS/QATMHINSTC) MBR({}) NEWMBR({})'.format(name, newname)
+    crt_http_svr = "call qcmdexc('{}');".format(sys_cmd)
+    cur.execute(crt_http_svr)
+
+    query = 'create or replace alias QUSRSYS.QATMHINSTC_{0} for QUSRSYS.QATMHINSTC({0})'.format(newname)
+    cur.execute(query)
+
+    query = '''update QUSRSYS.QATMHINSTC_{0}
+set CHARFIELD = '-apache -d /www/{0} -f conf/httpd.conf -AutoStartN' with NC'''.format(newname)
+    cur.execute(query)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    shutil.move('/www/' + name.lower(), '/www/' + newname.lower())
 
 
 def start(name):
@@ -515,7 +535,7 @@ def main():
     if args.command == 'create':
         create(args.name, args.conf, args.port)
     elif args.command == 'rename':
-        rename(args.name, args.newname)
+        rename_with_sql(args.name, args.newname)
     elif args.command == 'delete':
         delete_with_sql(args.name)
     elif args.command == 'start':
