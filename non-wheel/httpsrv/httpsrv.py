@@ -16,6 +16,10 @@ import shutil
 #                                                                       #
 #########################################################################
 
+# TODO - The instance still isn't working when starting out of the box. it times out
+# TODO - zendsvr6 and apache configs have not been tested yet
+# TODO - Qzui APIs would be preferable for creating and deleting HTTP Apache Instances
+
 
 def get_index_html(name):
     return '''<!doctype html>
