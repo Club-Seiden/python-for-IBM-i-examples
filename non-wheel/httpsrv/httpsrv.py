@@ -461,8 +461,6 @@ def delete_with_sql(name):
     cur.close()
     conn.close()
 
-    shutil.rmtree('/www/' + name.lower())
-
 
 def rename(name, newname):
     print('rename')
@@ -489,8 +487,6 @@ set CHARFIELD = '-apache -d /www/{0} -f conf/httpd.conf -AutoStartN' with NC'''.
     conn.commit()
     cur.close()
     conn.close()
-
-    shutil.move('/www/' + name.lower(), '/www/' + newname.lower())
 
 
 def start(name):
