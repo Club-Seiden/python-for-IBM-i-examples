@@ -516,6 +516,7 @@ def main():
 
     p_delete = sp.add_parser('delete', help='Delete HTTP Server Instance')
     p_delete.add_argument('--name', '-n', required=True)
+    p_delete.add_argument('--force', '-f', action='store_true', default=False)
 
     p_start = sp.add_parser('start', help='Start HTTP Server Instance')
     p_start.add_argument('--name', '-n', required=True)
@@ -533,11 +534,14 @@ def main():
     elif args.command == 'rename':
         rename_with_sql(args.name, args.newname)
     elif args.command == 'delete':
-        verification_text = 'Are you sure you want to delete {}? This cannot be undone. (y/N) '.format(args.name)
-        verified = input(verification_text) or 'n'
-
-        if verified.lower() in ['y', 'yes']:
+        if args.force:
             delete_with_sql(args.name)
+        else:
+            verification_text = 'Are you sure you want to delete {}? This cannot be undone. (y/N) '.format(args.name)
+            verified = input(verification_text) or 'n'
+
+            if verified.lower() in ['y', 'yes']:
+                delete_with_sql(args.name)
     elif args.command == 'start':
         start(args.name)
     elif args.command == 'restart':
