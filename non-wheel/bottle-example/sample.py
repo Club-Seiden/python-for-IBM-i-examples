@@ -4,7 +4,7 @@
 from bottle import request, get, post, static_file, route, run, template
 import ibm_db_dbi as dbi
 from itoolkit import *
-from itoolkit.lib.ilibcall import *     #for local jobs
+from itoolkit.db2.idb2call import *     #for local jobs
 
 version = tuple(map(int, dbi.__version__.split('.')))
 if version < (2, 0, 5, 5):
@@ -30,10 +30,10 @@ def query_ibm_db():
 @route('/cmd', method='POST')
 def cmd_toolkit():
     cl_statement = request.forms.get('cl')
-    
+
     # xmlservice
     itool = iToolKit()
-    itransport = iLibCall()
+    itransport = iDB2Call()
     itool.add(iCmd5250(cl_statement, cl_statement))
     itool.call(itransport)
    
