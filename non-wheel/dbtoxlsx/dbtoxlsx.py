@@ -1,4 +1,4 @@
-#!/QOpenSys/usr/bin/python3
+#!/usr/bin/env python3
 
 #
 # You will need to implement the following requisites for this application to

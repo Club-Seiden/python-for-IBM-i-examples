@@ -1,17 +1,20 @@
-Sample usage:
-./dbtoxlsx -h 
-```
-usage: dbtoxlsx.py [-h] [-c C] [-l L] [-f [FNAMES [FNAMES ...]]] [-o O] [-b B] [-i I]
 
-Example: python3 dbtoxlsx.py -c "select * From QSYS2.USER_INFO WHERE STATUS = '*ENABLED'" -o /home/test.xlsx 
+# "DBTOXLSX" using Python 3 and ibm_db_dbi
+
+# Installing requisites
+  - **ibm_db:** `yum install python3-ibm_db`
+  - **xlsxwriter** `pip3 install xlsxwriter`
+
+# Example
+- `python3 dbtoxlsx -h`
+- `python3 dbtoxlsx.py -c "select * From QSYS2.USER_INFO WHERE STATUS = '*ENABLED'" -o /home/test.xlsx `
+
+# Usage
+```
+dbtoxlsx.py [-h] [-c C] [-l L] [-f [FNAMES [FNAMES ...]]] [-o O] [-b B] [-i I]
 
 Implement SQL from IBM i command line and direct output to an Excel
 spreadsheet.
-
-Requires the latest ibm_db PTF: 
-https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/Python%20PTFs
-And xlsxwriter via command from SSH or qp2term:
-pip3 install xlsxwriter
 
 optional arguments:
   -h, --help            show this help message and exit
